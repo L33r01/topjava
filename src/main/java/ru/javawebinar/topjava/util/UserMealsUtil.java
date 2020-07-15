@@ -3,11 +3,12 @@ package ru.javawebinar.topjava.util;
 import ru.javawebinar.topjava.model.UserMeal;
 import ru.javawebinar.topjava.model.UserMealWithExcess;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
-import java.util.Arrays;
-import java.util.List;
+import java.time.chrono.ChronoLocalDateTime;
+import java.util.*;
 
 public class UserMealsUtil {
     public static void main(String[] args) {
@@ -23,17 +24,52 @@ public class UserMealsUtil {
 
         List<UserMealWithExcess> mealsTo = filteredByCycles(meals, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000);
         mealsTo.forEach(System.out::println);
-
-//        System.out.println(filteredByStreams(meals, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000));
     }
 
     public static List<UserMealWithExcess> filteredByCycles(List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
-        // TODO return filtered list with excess. Implement by cycles
-        return null;
-    }
+            List<UserMealWithExcess> result = new ArrayList<>();
+            Map<Long, Boolean> epochDays = new HashMap();
+            long epochday = 0;
+            int totalCalories = 0;
+            meals.sort(new Comparator<UserMeal>() {
+                @Override
+                public int compare(UserMeal o1, UserMeal o2) {
+                    return o1.getDateTime().compareTo(ChronoLocalDateTime.from(o2.getDateTime()));
+                }
+            });
+        for (UserMeal um :
+                meals) {
+            LocalTime lt = um.getDateTime().toLocalTime();
+            LocalDate ld = um.getDateTime().toLocalDate();
+            epochDays.put(ld.toEpochDay(), false);
+            if (epochday == 0) {
+                epochday = ld.toEpochDay();
+                totalCalories += um.getCalories();
+            } else if (epochday == ld.toEpochDay()) {
+                totalCalories += um.getCalories();
+            } else if (epochday != ld.toEpochDay()) {
+                if (totalCalories >= caloriesPerDay) {
+                    epochDays.put(epochday, true);
+                }
+                totalCalories = 0;
+                totalCalories += um.getCalories();
+                epochday = ld.toEpochDay();
+            }
 
-    public static List<UserMealWithExcess> filteredByStreams(List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
-        // TODO Implement by streams
-        return null;
+        }
+        if (totalCalories >= caloriesPerDay) {
+            epochDays.put(epochday, true);
+        }
+
+        for (UserMeal um :
+                meals) {
+            LocalTime lt = um.getDateTime().toLocalTime();
+            if (lt.compareTo(startTime) >= 0 && lt.isBefore(endTime)) {
+                LocalDate ld = um.getDateTime().toLocalDate();
+                result.add(new UserMealWithExcess(um.getDateTime(), um.getDescription(), um.getCalories(), epochDays.get(ld.toEpochDay())));
+            }
+        }
+
+        return result;
     }
 }
