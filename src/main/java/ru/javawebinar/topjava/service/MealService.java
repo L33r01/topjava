@@ -19,7 +19,7 @@ public class MealService {
     }
 
     public Meal get(int id, int authUserId) {
-        checkMealAcess(id,authUserId);
+//        checkMealAcess(id,authUserId);
         return checkNotFoundWithId(repository.get(id),id);
     }
 
@@ -30,12 +30,13 @@ public class MealService {
     }
 
     public void delete(int id, int authUserId) {
-        checkMealAcess(id,authUserId);
+//        checkMealAcess(id,authUserId);
        checkNotFoundWithId(repository.delete(id),id);
     }
 
     public void update(Meal meal, int authUserId) {
-        checkMealAcess(meal.getId(),authUserId);
-        checkNotFoundWithId(repository.save(meal),meal.getId());
+//        checkMealAcess(meal.getId(),authUserId);
+        Meal newMeal = repository.save(meal);
+        checkNotFoundWithId(newMeal,meal.getId());
     }
 }

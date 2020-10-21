@@ -8,6 +8,8 @@ import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.service.MealService;
 import ru.javawebinar.topjava.service.UserService;
+import ru.javawebinar.topjava.to.MealTo;
+import ru.javawebinar.topjava.util.MealsUtil;
 import ru.javawebinar.topjava.web.SecurityUtil;
 
 import java.util.List;
@@ -23,14 +25,14 @@ public class MealRestController {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
-    public List<Meal> getAll() {
-            log.info("getAll");
-            return service.getAll(authUserId());
+    public List<MealTo> getAll() {
+        log.info("getAll");
+        return MealsUtil.getTos(service.getAll(authUserId()),MealsUtil.DEFAULT_CALORIES_PER_DAY);
     }
 
     public Meal get(int id) {
         log.info("get {}", id);
-        return service.get(id, authUserId());
+        return service.get(id, authUserId()); 
     }
 
     public Meal create(Meal meal) {
